@@ -661,6 +661,18 @@ resource "aws_instance" "web" {
   subnet_id	= aws_subnet.vpc_subnets[count.index].id
  
   vpc_security_group_ids = [aws_security_group.allow_ssh.id, aws_security_group.allow_web.id, aws_security_group.allow_egress_all.id]
+
+  provisioner "remote-exec" {
+    connection {
+    type        = "ssh"
+    user        = "ec2-user"
+    private_key = file("../aws_keys/id_rsa")
+    host     = "${self.public_ip}"
+  }
+    inline = [
+      "sudo su -c \"yum -y install httpd && systemctl enable httpd && systemctl start httpd && echo 'This is WEB instance #${count.index}' > /var/www/html/index.html && chown nobody. /var/www/html/index.html\""
+    ]
+  }
   tags = {
     Name = "Web ${count.index}"
   }
