@@ -482,6 +482,26 @@ resource "aws_security_group" "allow_web" {
   ]
 }
 
+resource "aws_security_group" "allow_ingress_all" {
+  name        = "allow_ingress_all"
+  description = "Allow all ingress traffic"
+  vpc_id      = aws_vpc.vpc_01.id
+
+  ingress =[
+    {
+      description = "Allow ingress traffic"
+      protocol    = "tcp"
+      from_port   = 0
+      to_port     = 0
+      cidr_blocks = ["0.0.0.0/0"]
+      ipv6_cidr_blocks = []
+      prefix_list_ids  = []
+      security_groups  = []
+      self             = true
+    }
+  ]
+}
+
 resource "aws_security_group" "allow_egress_all" {
   name        = "allow_egress_all"
   description = "Allow outbound traffic to all destinations"
