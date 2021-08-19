@@ -647,11 +647,17 @@ resource "aws_lb_listener" "web_lb_http" {
 #    target_group_arn = aws_lb_target_group.web_lb_https_target.arn
 #  }
 #}
+
+resource "aws_key_pair" "ec2_web" {
+  key_name   = "ec2-web"
+  public_key = file("../aws_keys/id_rsa.pub") 
+}
 resource "aws_instance" "web" {
   count	= length(aws_subnet.vpc_subnets)
 
   ami		= "ami-0c2b8ca1dad447f8a"
   instance_type = "t2.micro"
+  key_name      = aws_key_pair.ec2_web.key_name
   subnet_id	= aws_subnet.vpc_subnets[count.index].id
  
   vpc_security_group_ids = [aws_security_group.allow_ssh.id, aws_security_group.allow_web.id, aws_security_group.allow_egress_all.id]
