@@ -385,6 +385,60 @@ resource "aws_lb" "web_lb" {
     Environment = "test"
   }
 }
+
+resource "aws_lb_target_group" "web_lb_http_target" {
+  name     = "web-lb-http-target"
+  port     = 80
+  protocol = "HTTP"
+  vpc_id   = aws_vpc.vpc_01.id
+}
+
+resource "aws_lb_target_group" "web_lb_https_target" {
+  name     = "web-lb-https-target"
+  port     = 443
+  protocol = "HTTPS"
+  vpc_id   = aws_vpc.vpc_01.id
+}
+
+resource "aws_lb_target_group_attachment"  "web_lb_tg_attachment_http_instances" {
+  count = length(aws_subnet.vpc_subnets)
+
+  target_group_arn = aws_lb_target_group.web_lb_http_target.arn
+  target_id        = aws_instance.web[count.index].id
+  port             = 80  
+}
+
+resource "aws_lb_target_group_attachment"  "web_lb_tg_attachment_https_instances" {
+  count = length(aws_subnet.vpc_subnets)
+
+  target_group_arn = aws_lb_target_group.web_lb_https_target.arn
+  target_id        = aws_instance.web[count.index].id
+  port             = 443
+}
+
+resource "aws_lb_listener" "web_lb_http" {
+  load_balancer_arn = aws_lb.web_lb.arn
+  port              = 80
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.web_lb_http_target.arn
+  }
+}
+
+#resource "aws_lb_listener" "web_lb_https" {
+#  load_balancer_arn = aws_lb.web_lb.arn
+#  port              = 443
+#  protocol          = "HTTPS"
+ # ssl_policy        = "ELBSecurityPolicy-2016-08"
+ # certificate_arn   = "arn:aws:iam::187416307283:server-certificate/test_cert_rab3wuqwgja25ct3n4jdj2tzu4"
+
+#  default_action {
+#    type             = "forward"
+#    target_group_arn = aws_lb_target_group.web_lb_https_target.arn
+#  }
+#}
 resource "aws_instance" "web" {
   count	= length(aws_subnet.vpc_subnets)
 
