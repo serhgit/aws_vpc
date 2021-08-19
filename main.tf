@@ -74,11 +74,12 @@ resource "aws_network_acl" "nacl_az1" {
   subnet_ids = [aws_subnet.vpc_subnets[0].id]
 
   egress = [
+    #Allow HTTP to everywhere
     {
       protocol   = "tcp"
       rule_no    = 100
       action     = "allow"
-      cidr_block = aws_subnet.vpc_subnets[0].cidr_block
+      cidr_block = "0.0.0.0/0"
       from_port  = 80
       to_port    = 80
 
@@ -88,11 +89,12 @@ resource "aws_network_acl" "nacl_az1" {
       icmp_type       = 0
       ipv6_cidr_block = ""
     },
+    #Allow HTTPS to everywhere
     {
       protocol   = "tcp"
       rule_no    = 110
       action     = "allow"
-      cidr_block = aws_subnet.vpc_subnets[0].cidr_block
+      cidr_block = "0.0.0.0/0"
       from_port  = 443
       to_port    = 443
 
@@ -102,10 +104,27 @@ resource "aws_network_acl" "nacl_az1" {
       icmp_type       = 0
       ipv6_cidr_block = ""
     },
-     #Allow subnets in this NACL to act as clients (i.e. send TCP packets from ephemeral TCP port range)
+    #Allow access to SSH (port 22) to everywhere
     {
       protocol   = "tcp"
       rule_no    = 120
+      action     = "allow"
+      cidr_block = "0.0.0.0/0"
+      from_port  = 22
+      to_port    = 22
+
+      #These vars must be initialized
+      #Otherwise it fails
+      icmp_code       = 0
+      icmp_type       = 0
+      ipv6_cidr_block = ""
+    },
+     #Allow response to epheral ports
+     #This allows to establish connections
+     #from remote resources
+    {
+      protocol   = "tcp"
+      rule_no    = 130
       action     = "allow"
       cidr_block = "0.0.0.0/0"
       from_port  = 1024
@@ -146,6 +165,81 @@ resource "aws_network_acl" "nacl_az1" {
       #Otherwise it fails
       icmp_code       = 0
       icmp_type       = 0
+      ipv6_cidr_block = ""
+    },
+    #Allow access to SSH (port 22) from everywhere
+    {
+      protocol   = "tcp"
+      rule_no    = 120
+      action     = "allow"
+      cidr_block = "0.0.0.0/0"
+      from_port  = 22
+      to_port    = 22
+
+      #These vars must be initialized
+      #Otherwise it fails
+      icmp_code       = 0
+      icmp_type       = 0
+      ipv6_cidr_block = ""
+    },
+    {
+      protocol   = "tcp"
+      rule_no    = 130
+      action     = "allow"
+      cidr_block = "0.0.0.0/0"
+      from_port  = 80
+      to_port    = 80
+
+      #These vars must be initialized
+      #Otherwise it fails
+      icmp_code       = 0
+      icmp_type       = 0
+      ipv6_cidr_block = ""
+    },
+    {
+      protocol   = "tcp"
+      rule_no    = 140
+      action     = "allow"
+      cidr_block = "0.0.0.0/0"
+      from_port  = 443
+      to_port    = 443
+
+      #These vars must be initialized
+      #Otherwise it fails
+      icmp_code       = 0
+      icmp_type       = 0
+      ipv6_cidr_block = ""
+    },
+    #Allow ingress ephemeral ports
+    #This allows to establish connections
+    #to remote resources
+    {
+      protocol   = "tcp"
+      rule_no    = 150
+      action     = "allow"
+      cidr_block = "0.0.0.0/0"
+      from_port  = 1024
+      to_port    = 65535
+
+      #These vars must be initialized
+      #Otherwise it fails
+      icmp_code       = 0
+      icmp_type       = 0
+      ipv6_cidr_block = ""
+    },
+    #Allow ICMP unreachables
+    #We want to know when packets
+    #need to be fragmented on our side
+    #(PMTU)
+    {
+      protocol   = "icmp"
+      rule_no    = 160
+      action     = "allow"
+      cidr_block = "0.0.0.0/0"
+      from_port  = 0
+      to_port    = 0
+      icmp_code       = 4
+      icmp_type       = 3
       ipv6_cidr_block = ""
     }
   ]
@@ -161,11 +255,12 @@ resource "aws_network_acl" "nacl_az2" {
   subnet_ids = [aws_subnet.vpc_subnets[1].id]
 
   egress = [
+    #Allow HTTP to everywhere
     {
       protocol   = "tcp"
       rule_no    = 100
       action     = "allow"
-      cidr_block = aws_subnet.vpc_subnets[1].cidr_block
+      cidr_block = "0.0.0.0/0"
       from_port  = 80
       to_port    = 80
 
@@ -175,11 +270,12 @@ resource "aws_network_acl" "nacl_az2" {
       icmp_type       = 0
       ipv6_cidr_block = ""
     },
+    #Allow HTTPS to everywhere
     {
       protocol   = "tcp"
       rule_no    = 110
       action     = "allow"
-      cidr_block = aws_subnet.vpc_subnets[1].cidr_block
+      cidr_block = "0.0.0.0/0"
       from_port  = 443
       to_port    = 443
 
@@ -189,10 +285,27 @@ resource "aws_network_acl" "nacl_az2" {
       icmp_type       = 0
       ipv6_cidr_block = ""
     },
-     #Allow subnets in this NACL to act as clients (i.e. send TCP packets from ephemeral TCP port range)
+    #Allow access to SSH (port 22) to everywhere
     {
       protocol   = "tcp"
       rule_no    = 120
+      action     = "allow"
+      cidr_block = "0.0.0.0/0"
+      from_port  = 22
+      to_port    = 22
+
+      #These vars must be initialized
+      #Otherwise it fails
+      icmp_code       = 0
+      icmp_type       = 0
+      ipv6_cidr_block = ""
+    },
+     #Allow response to epheral ports
+     #This allows to establish connections
+     #from remote resources
+    {
+       protocol   = "tcp"
+      rule_no    = 130
       action     = "allow"
       cidr_block = "0.0.0.0/0"
       from_port  = 1024
@@ -234,7 +347,82 @@ resource "aws_network_acl" "nacl_az2" {
       icmp_code       = 0
       icmp_type       = 0
       ipv6_cidr_block = ""
-    }
+    },
+    #Allow access to SSH (port 22) from everywhere
+    {
+      protocol   = "tcp"
+      rule_no    = 120
+      action     = "allow"
+      cidr_block = "0.0.0.0/0"
+      from_port  = 22
+      to_port    = 22
+
+      #These vars must be initialized
+      #Otherwise it fails
+      icmp_code       = 0
+      icmp_type       = 0
+      ipv6_cidr_block = ""
+    },
+    {
+      protocol   = "tcp"
+      rule_no    = 130
+      action     = "allow"
+      cidr_block = "0.0.0.0/0"
+      from_port  = 80
+      to_port    = 80
+
+      #These vars must be initialized
+      #Otherwise it fails
+      icmp_code       = 0
+      icmp_type       = 0
+      ipv6_cidr_block = ""
+    },
+    {
+      protocol   = "tcp"
+      rule_no    = 140
+      action     = "allow"
+      cidr_block = "0.0.0.0/0"
+      from_port  = 443
+      to_port    = 443
+
+      #These vars must be initialized
+      #Otherwise it fails
+      icmp_code       = 0
+      icmp_type       = 0
+      ipv6_cidr_block = ""
+    },
+    #Allow ingress ephemeral ports
+    #This allows to establish connections
+    #to remote resources
+    {
+      protocol   = "tcp"
+      rule_no    = 150
+      action     = "allow"
+      cidr_block = "0.0.0.0/0"
+      from_port  = 1024
+      to_port    = 65535
+
+      #These vars must be initialized
+      #Otherwise it fails
+      icmp_code       = 0
+      icmp_type       = 0
+      ipv6_cidr_block = ""
+     },
+     #Allow ICMP unreachables
+     #We want to know when packets
+     #need to be fragmented on our side
+     #(PMTU)
+     {
+       protocol   = "icmp"
+       rule_no    = 160
+       action     = "allow"
+       cidr_block = "0.0.0.0/0"
+       from_port  = 0
+       to_port    = 0
+       icmp_code       = 4
+       icmp_type       = 3
+       ipv6_cidr_block = ""
+     }
   ]
 
   tags = {
