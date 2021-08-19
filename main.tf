@@ -314,6 +314,77 @@ resource "aws_security_group" "allow_egress_all" {
     }
   ]
 }
+
+resource "aws_security_group" "web_lb_sg" {
+  name        = "web-lb-sg"
+  description = "Allow access to Web ALB"
+  vpc_id      = aws_vpc.vpc_01.id
+
+  ingress = [
+    {
+      description      = "Allow all inbound traffic to HTTP"
+      from_port        = 80
+      to_port          = 80
+      protocol         = "tcp"
+      cidr_blocks      = ["0.0.0.0/0"]
+      ipv6_cidr_blocks = []
+      prefix_list_ids  = []
+      security_groups  = []
+      self             = true
+    },
+    {
+      description      = "Allow all inbound traffic to HTTPS"
+      from_port        = 443
+      to_port          = 443
+      protocol         = "tcp"
+      cidr_blocks      = ["0.0.0.0/0"]
+      ipv6_cidr_blocks = []
+      prefix_list_ids  = []
+      security_groups  = []
+      self             = true
+    }
+  ]
+  
+  egress = [
+    {
+     description      = "Allow all outbound traffic to HTTP from ALB to Web instances"
+      from_port        = 80
+      to_port          = 80
+      protocol         = "tcp"
+      cidr_blocks      = aws_subnet.vpc_subnets.*.cidr_block
+      ipv6_cidr_blocks = []
+      prefix_list_ids  = []
+      security_groups  = []
+      self             = true
+    },
+    {
+     description      = "Allow all outbound traffic to HTTPS from ALB to Web instances"
+      from_port        = 443
+      to_port          = 443
+      protocol         = "tcp"
+      cidr_blocks      = aws_subnet.vpc_subnets.*.cidr_block
+      ipv6_cidr_blocks = []
+      prefix_list_ids  = []
+      security_groups  = []
+      self             = true
+    }
+  ]
+}
+
+resource "aws_lb" "web_lb" {
+  name               = "web-lb"
+  internal           = false
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.web_lb_sg.id]
+  subnets            = aws_subnet.vpc_subnets.*.id
+  
+
+  enable_deletion_protection = true
+
+  tags = {
+    Environment = "test"
+  }
+}
 resource "aws_instance" "web" {
   count	= length(aws_subnet.vpc_subnets)
 
